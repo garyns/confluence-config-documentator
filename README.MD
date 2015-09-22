@@ -9,6 +9,17 @@ The name is a mouth full, but the concept behind confdoc is simple - to create a
 ```
   npm install -g confluence-config-documentator
 ```
+Now you can type `confdoc` on the command line.
+
+## GIT Cloning
+
+If you are cloning / folking from GIT, run the following to install dependencies.
+
+```
+cd confluence-config-documentator
+npm install
+```
+
 
 ## Usage
 
