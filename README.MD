@@ -1,6 +1,6 @@
 # Confluence Config Documentator (confdoc)
 
->A command line utility to document textual configurations files in Atlassian Confluence.
+>A command line utility to help document textual configurations files in Atlassian Confluence.
 
 The name is a mouth full, but the concept behind confdoc is simple - to create and update Confluence pages with the content of a configuration text file (or any text file for that matter).
 
@@ -73,6 +73,23 @@ Or an INI file:
 ...
 ```
 
+### Defaults ~/.confdoc
+
+If you create a file called `.confdoc` in your home directory then defaults will be read from this file. All parameters are optional, and the file must be valid JSON. **This feature is only supported in NodeJS 4.1.0+**
+
+The following defaults are supported:
+
+```
+{
+  "server": "http://myconfluenceserver.com",
+  "spaceKey": "mySpaceKey",
+  "parentId": "12345",
+  "username": "myusername",
+  "password": "myPassword"
+}
+```
+
+Remember that *parentId* is only relevant when a new Confluence Page is created.
 
 ## Examples
 
@@ -121,7 +138,7 @@ The uploade file is added to a Confluence Page using a {code} macro. The title o
 
 When updating a page, confdoc looks for a {code} macro with a title matching the file name of the configuration file. If a {code} macro is found, it is updated. Otherwise a new {code} macro is appended to the page. This means you can add your own content to the Confluence Page and it will be perserved.
 
-![Confluence](http://take.ms/bNUq4)
+![Conf1](https://raw.githubusercontent.com/garyns/confluence-config-documentator/master/doc/conf1.jpg)
 
 
 ## Free Versioning & Differentials!
@@ -145,4 +162,4 @@ Use the `--verbose` option. This can help output more verbose error messages.
 **How do I find a Page's Id for use with --parentId or --pageId?**
 
 Edit the page in Confluence. The Page Id is in the address bar.
-![Confluence Page Id](http://take.ms/CYLU6)
+![Conf2](https://raw.githubusercontent.com/garyns/confluence-config-documentator/master/doc/conf2.jpg)

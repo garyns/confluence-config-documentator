@@ -26,11 +26,10 @@ if (os.homedir) {
         
         
     } catch (e) {
-        // File not found
-        console.log(e);
+        // File not found or not parsable.
+        // console.error(e);
     }
 }
-console.log(userConfigJSON);
 
 if (process.argv.length <= 2) {
     
@@ -49,7 +48,7 @@ var ops = stdio.getopt({
     'username': {key: 'u', args: 1, description: 'Confluence Username', mandatory: !userConfigJSON.username, default:userConfigJSON.username},
     'password': {key: 'p', args: 1, description: 'Confluence Password', mandatory: !userConfigJSON.password, default:userConfigJSON.password},
     'spaceKey': {key: 'k', args:1, description: "Confluence Space Key", mandatory: false, default:userConfigJSON.spaceKey},
-    'parentId': {key: 'o', args:1, description: "Confluence Parent Page Id (when creating new page. Space root used if not specified)", mandatory: false, default: null},
+    'parentId': {key: 'o', args:1, description: "Confluence Parent Page Id (when creating new page. Space root used if not specified)", mandatory: false, default:userConfigJSON.parentId},
     'pageId': {key: 'i', args:1, description: "Confluence Page Id (if not specified, title will be used to find page.)", mandatory: false, default: null},
     'title': {key: 't', args:1, description: "Confluence Page Title (defaults to hostname:filename)", mandatory: false, default: null},
     //'status': {key: 'a', multiple: true, description: "Add a static macro", mandatory: false, default: null},
@@ -588,7 +587,7 @@ function updateCodeMacro(file, body, content) {
  * Check is a new version if avaiable and output messge if there is.
  */
 function checkForNewVersion() {
-    if (!config.noupgrade && config.verbose) {
+    if (!config.noupgrade && !config.quiet) {
         selfupdate.isUpdated(packageJSON, function(error, isUpdated) {
             if(error) throw error;
             
