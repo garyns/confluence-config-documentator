@@ -1,6 +1,6 @@
 # Confluence Config Documentator (confdoc)
 
->A command line utility to help document textual configurations files in Atlassian Confluence.
+>A command line utility to document textual configurations files in Atlassian Confluence.
 
 The name is a mouth full, but the concept behind confdoc is simple - to create and update Confluence pages with the content of a configuration text file (or any text file for that matter).
 

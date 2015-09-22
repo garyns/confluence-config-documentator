@@ -12,8 +12,9 @@ var packageJSON = require('./package.json');
 
 if (process.argv.length <= 2) {
     
+    console.log(packageJSON.name + " " + packageJSON.version);
     console.log("\nUsage " +  process.argv[1] + " --server <confluence_server_url>  --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade]>");
-    console.log("\nFor more information " + process.argv[1] + " --help\n");
+    console.log("\nFor more information " + process.argv[1] + " --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     process.exit(1);
     
 }
