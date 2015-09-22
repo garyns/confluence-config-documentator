@@ -1,0 +1,22 @@
+{
+  "name": "confluence-config-documentator",
+  "version": "1.0.1",
+  "description": "Create or update pages in Confluence to document configuration files",
+  "main": "confdoc.js",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "moment": "^2.10.6",
+    "selfupdate": "^1.1.0",
+    "stdio": "^0.2.7",
+    "superagent": "^1.4.0"
+  },
+  "bin": {
+    "confdoc": "confdoc.js"
+  },
+  "keywords": [
+    "confluence",
+    "atlassian"
+  ],
+  "author": "Gary Smart (http://smart-itc.com.au)",
+  "license": "ISC"
+}
