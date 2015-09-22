@@ -10,13 +10,34 @@ var Confluence = require("./Confluence");
 var selfupdate = require('selfupdate');
 var packageJSON = require('./package.json');
 
+var userConfigJSON = {
+    username: null,
+    password: null,
+    server: null,
+    spaceKey: null
+}
+
+if (os.homedir) {
+    try {
+        /**
+         * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
+         */
+        userConfigJSON = JSON.parse(fs.readFileSync(os.homedir() + '/.confdoc', 'utf8'));
+        
+        
+    } catch (e) {
+        // File not found
+        console.log(e);
+    }
+}
+console.log(userConfigJSON);
+
 if (process.argv.length <= 2) {
     
     console.log(packageJSON.name + " " + packageJSON.version);
     console.log("\nUsage " +  process.argv[1] + " --server <confluence_server_url>  --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade]>");
     console.log("\nFor more information " + process.argv[1] + " --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     process.exit(1);
-    
 }
 
 var ops = stdio.getopt({
@@ -24,10 +45,10 @@ var ops = stdio.getopt({
     'quiet': {key: 'q', description: 'Suspress non-error output', default:false},
     'verbose': {key: 'v', description: 'Verbose output', default:false},
     'noupgrade': {key:"n", description: 'Suspress new version check', default:false},
-    'server': {key: 's', args: 1, description: 'Confluence Server URL', mandatory: true},
-    'username': {key: 'u', args: 1, description: 'Confluence Username', mandatory: true},
-    'password': {key: 'p', args: 1, description: 'Confluence Password', mandatory: true},
-    'spaceKey': {key: 'k', args:1, description: "Confluence Space Key", mandatory: false, default:null},
+    'server': {key: 's', args: 1, description: 'Confluence Server URL', mandatory: !userConfigJSON.server, default:userConfigJSON.server},
+    'username': {key: 'u', args: 1, description: 'Confluence Username', mandatory: !userConfigJSON.username, default:userConfigJSON.username},
+    'password': {key: 'p', args: 1, description: 'Confluence Password', mandatory: !userConfigJSON.password, default:userConfigJSON.password},
+    'spaceKey': {key: 'k', args:1, description: "Confluence Space Key", mandatory: false, default:userConfigJSON.spaceKey},
     'parentId': {key: 'o', args:1, description: "Confluence Parent Page Id (when creating new page. Space root used if not specified)", mandatory: false, default: null},
     'pageId': {key: 'i', args:1, description: "Confluence Page Id (if not specified, title will be used to find page.)", mandatory: false, default: null},
     'title': {key: 't', args:1, description: "Confluence Page Title (defaults to hostname:filename)", mandatory: false, default: null},
@@ -37,7 +58,7 @@ var ops = stdio.getopt({
 
 var file = ops['args'] ? ops['args'][0] : null;
 if (file !== null) {
-    file = path.resolve(file);
+    file = path.resolve(file); // Absolute file.
 }
 
 var config = {
@@ -57,18 +78,22 @@ var config = {
     confluenceConfig: {
         username: ops['username'],
         password: ops['password'],
-        baseUrl:  ops['server'],
+        server:  ops['server'],
         debug: false
     }
     
 } // config
-    
+
+// Interact with Confluence via REST API.
 var confluence = new Confluence(config.confluenceConfig);
 
 //------------------------------------------------------------------------------
 
 checkForNewVersion();
 
+/**
+ * STEP 1 Start by getting the content of the config file.
+ */
 getContent(file, function(err, content) {
     
     if (err) {
@@ -78,6 +103,7 @@ getContent(file, function(err, content) {
         
     } else {
         
+        // STEP 2 We have file contents, next check we have all the required information.
         checkAttributes(config, file, content, function(err, results) {
             
             if (err) {
@@ -93,6 +119,9 @@ getContent(file, function(err, content) {
 
 //------------------------------------------------------------------------------
 
+/**
+ * Get file content or read from stdin.
+ */
 function getContent(file, callback) {
     
     if (file !== null) {
@@ -129,7 +158,9 @@ function getContent(file, callback) {
 
 } // getContent()
 
-
+/**
+ * Resolve title for Confluence Page.
+ */
 function resolveTitle(config, content, file) {
     
     var pattern = /^(.)\1[\s]*Title:(.*)$/mi; 
@@ -150,6 +181,9 @@ function resolveTitle(config, content, file) {
     
 } // resolveTitle()
 
+/**
+ * Resolve Confluence Space Key.
+ */
 function resolveSpaceKey(config, content) {
     
     var pattern = /^(.)\1[\s]*SpaceKey:(.*)$/m; 
@@ -168,6 +202,9 @@ function resolveSpaceKey(config, content) {
         
 } // resolveSpaceKey()
 
+/**
+ * Resolve Confluence Page Id.
+ */
 function resolvePageId(config, content) {
     
     var pattern = /^(.)\1[\s]*PageId:(.*)$/mi; 
@@ -191,6 +228,9 @@ function resolvePageId(config, content) {
         
 } // resolveParentId()
 
+/**
+ * Resolve Confluence Parent Page Id
+ */
 function resolveParentId(config, content) {
     
     var pattern = /^(.)\1[\s]*ParentId:(.*)$/mi; 
@@ -214,6 +254,9 @@ function resolveParentId(config, content) {
         
 } // resolveParentId()
 
+/**
+ * Resolve Confluence Page Labels.
+ */
 function resolveLabels(config, content) {
     
     var pattern = /^(.)\1[\s]*Labels?:(.*)$/mi; 
@@ -252,6 +295,9 @@ function resolveStatus(config, content) {
 } // resolveStatus()
 */
 
+/**
+ * Check that we have all the information required to create or update a page in Confluence.
+ */
 function checkAttributes(config, file, content, callback) {
     
     var pageatts = {};
@@ -282,6 +328,7 @@ function checkAttributes(config, file, content, callback) {
         }
     }
 
+    // STEP 3 We have the basic information, now update with results from Confluence. 
     updatePageAtts(config, pageatts, function(err, pageatts) {
         
         if (err) {
@@ -291,12 +338,17 @@ function checkAttributes(config, file, content, callback) {
             console.error("Page not found".red.bold);
             return;
         } else {
+            
+            // STEP 4 Update (or Create) Confluence Page.
             updatePage(config, pageatts, content);
         }
     });
     
 } // checkAttributes()
 
+/**
+ * Find page to update Confluence. If we don't find a page, a new one will be created later.
+ */
 function updatePageAtts(config, pageatts, callback) {    
     
     if (pageatts.pageId) {
@@ -338,7 +390,7 @@ function updatePageAtts(config, pageatts, callback) {
         pageatts.version = null;
         pageatts.body = null;
         
-        confluence.getContentByPageTitle(pageatts.spaceKey, pageatts.title, "body.storage,version", function(err, response) {
+        confluence.findContentByPageTitle(pageatts.spaceKey, pageatts.title, "body.storage,version", function(err, response) {
      
             if (response.statusCode && response.statusCode !== 200) {
                 
@@ -377,13 +429,21 @@ function updatePageAtts(config, pageatts, callback) {
     
 } // updatePageAtts()
 
+/**
+ * Creates or Updates a Confluence Page and includes the input file in a {code} macro.
+ */
 function updatePage(config, pageatts, content) {
     
     pageatts.body = updateCodeMacro(pageatts.file, pageatts.body, content);
     
+    
     if (pageatts.pageId === null) {
         
-        confluence.postContent(pageatts.spaceKey, pageatts.title, pageatts.body, pageatts.parentId, function(err, response) {
+        //
+        // Creating a new page.
+        //
+        
+        confluence.postPageContent(pageatts.spaceKey, pageatts.title, pageatts.body, pageatts.parentId, function(err, response) {
             
             if (err) {
                 
@@ -398,6 +458,8 @@ function updatePage(config, pageatts, content) {
                 
                 pageatts.pageId = response.id;
                 pageatts.version = response.version.number;
+                
+                // Step 5 Add Labels to Page.
                 addTags(pageatts);
                 
                 if (!config.quiet) {
@@ -410,8 +472,12 @@ function updatePage(config, pageatts, content) {
         
     } else {
         
+        //
+        // Updaing an existing page (because we have a page id).
+        //        
+        
         var minorEdit = true;
-        confluence.putContent(pageatts.spaceKey, pageatts.pageId, pageatts.version+1, pageatts.title, pageatts.body, minorEdit, function(err, response) {
+        confluence.putPageContent(pageatts.spaceKey, pageatts.pageId, pageatts.version+1, pageatts.title, pageatts.body, minorEdit, function(err, response) {
             
             if (err) {
                 
@@ -424,6 +490,7 @@ function updatePage(config, pageatts, content) {
                 
             } else {
                 
+                // Step 5 Add Labels to Page.
                 addTags(pageatts);
                         
                 pageatts.version = response.version.number;
@@ -441,6 +508,10 @@ function updatePage(config, pageatts, content) {
     
 }// updatePage()
 
+
+/**
+ * Add labels to a Confluence Page.
+ */
 function addTags(pageatts) {
     
     if (pageatts.labels.length > 0) {
@@ -455,6 +526,9 @@ function addTags(pageatts) {
     
 }
 
+/**
+ * Create or Update a {code} macro with a new title and content body.
+ */
 function updateCodeMacro(file, body, content) {
    
     var now = moment.format("YYYY-MM-DD, h:mm:ssa");
@@ -528,6 +602,9 @@ function checkForNewVersion() {
 } // checkForNewVersion()
 
 
+/**
+ * Create a new Confluence {code} macro.
+ */
 function createCodeMacro(title, content) {
     
     var m = '<ac:structured-macro ac:name="code">\
@@ -555,6 +632,9 @@ function createStatusMacro(title, color, outline) {
 }
 */
 
+/**
+ * Log error messages to console.
+ */
 console.error = function(err) {
     
     if (typeof err === "string") {

@@ -6,30 +6,25 @@ function Confluence(config) {
     
     if (!(this instanceof Confluence)) return new Confluence(config);
 
-    if (!config) {
-        throw new Error("Confluence module expects a config object.");
-    }
-    else if (!config.username || ! config.password) {
-        throw new Error("Confluence module expects a config object with both a username and password.");
-    }
-    else if (!config.baseUrl) {
-        throw new Error("Confluence module expects a config object with a baseUrl.");
+    if (!config || !config.username || ! config.password || !config.server) {
+        throw new Error("Bad Config: username, password and server are all required.");
     }
 
     this.config = config;
 }
 
-/**
- * Get space home page.
- *
- * @param {string} space
- * @param {Function} callback
- */
-Confluence.prototype.getSpaceHomePage = function(space, callback) {
+
+Confluence.prototype.getHomePage = function(space, callback) {
     var config = this.config;
+    
+    var url = config.server + "/rest/api/space?spaceKey=" + space;
+    
+    if (this.config.debug) {
+        console.log("GET: " + url);
+    }    
 
     request
-        .get(config.baseUrl + "/rest/api/space?spaceKey=" + space)
+        .get(url)
         .auth(config.username, config.password)
         .end(function(err, res){
             if (err) {
@@ -37,39 +32,29 @@ Confluence.prototype.getSpaceHomePage = function(space, callback) {
             }
             else {
                 try {
-                    var url = config.baseUrl + res.body.results[0]._expandable.homepage;
+                    var url = config.server + res.body.results[0]._expandable.homepage;
                     request
                         .get(url)
                         .auth(config.username, config.password)
                         .end(function(err, res){
                             callback(err, res.body);
-                        });
-                        
-                        if (config.debug) {
-                            console.log("GET: " + url);
-                        }                        
+                        });                      
                 }
                 catch (e) {
-                    callback("Can't find space home page. " + e.message, res);
+                    callback("Space home page could not be found. " + e.message, res);
                 }
             }
         });
 
 };
 
-/**
- * Get stored content for a specific space and page title.
- *
- * @param {string} id
- * @param {Function} callback
- */
 Confluence.prototype.getContentById = function(id, expand, callback) {
     
     if (expand === undefined) {
         expand = "version,body.view";
     }
     
-    var url = this.config.baseUrl + "/rest/api/content/" + id + "?expand=" + expand;
+    var url = this.config.server + "/rest/api/content/" + id + "?expand=" + expand;
 
     request
         .get(url)
@@ -83,25 +68,18 @@ Confluence.prototype.getContentById = function(id, expand, callback) {
     }
 };
 
-/**
- * Get stored content for a specific space and page title.
- *
- * @param {string} space
- * @param {string} title
- * @param {Function} callback
- */
-Confluence.prototype.getContentByPageTitle = function(space, title, expand, callback) {
+Confluence.prototype.findContentByPageTitle = function(space, title, expand, callback) {
     
     if (expand === undefined) {
         expand = "version,body.view";
     }    
         
-    var query =
+    var q =
         "?spaceKey=" + space +
         "&title=" + title +
         "&expand=" + expand;
         
-    var url = this.config.baseUrl + "/rest/api/content" + query;
+    var url = this.config.server + "/rest/api/content" + q;
 
     request
         .get(url)
@@ -116,16 +94,7 @@ Confluence.prototype.getContentByPageTitle = function(space, title, expand, call
 
 };
 
-/**
- * Post content to a new page.
- *
- * @param {string} space
- * @param {string} title
- * @param {string} content
- * @param {number} parentId - A null value will cause the page to be added under the space's home page
- * @param {Function} callback
- */
-Confluence.prototype.postContent = function(space, title, content, parentId, callback) {
+Confluence.prototype.postPageContent = function(spaceKey, title, content, parentId, callback) {
     
     var config = this.config;
     
@@ -133,7 +102,7 @@ Confluence.prototype.postContent = function(space, title, content, parentId, cal
         "type": "page",
         "title": title,
         "space": {
-            "key": space
+            "key": spaceKey
         },
         "ancestors": [{
             "type": "page"
@@ -146,9 +115,9 @@ Confluence.prototype.postContent = function(space, title, content, parentId, cal
         }
     };
 
-    function createPage() {
+    function newPage() {
         
-        var url = config.baseUrl + "/rest/api/content";
+        var url = config.server + "/rest/api/content";
         
         request
             .post(url)
@@ -165,7 +134,7 @@ Confluence.prototype.postContent = function(space, title, content, parentId, cal
     }
 
     if (!parentId) {
-        this.getSpaceHomePage(space, function(err, res) {
+        this.getHomePage(spaceKey, function(err, res) {
             if (err) callback(err);
 
             else if (!res || !res.id) {
@@ -173,28 +142,18 @@ Confluence.prototype.postContent = function(space, title, content, parentId, cal
             }
             else {
                 page.ancestors[0].id = res.id;
-                createPage();
+                newPage();
             }
         });
     }
     else {
         page.ancestors[0].id = parentId;
-        createPage();
+        newPage();
     }
 
 };
 
-/**
- * Put/update stored content for a page.
- *
- * @param {string} space
- * @param {string} id
- * @param {number} version
- * @param {string} title
- * @param {string} content
- * @param {Function} callback
- */
-Confluence.prototype.putContent = function(space, id, version, title, content, minorEdit, callback) {
+Confluence.prototype.putPageContent = function(spaceKey, id, version, title, content, minorEdit, callback) {
     
     if (minorEdit === undefined) {
         minorEdit = true;
@@ -205,7 +164,7 @@ Confluence.prototype.putContent = function(space, id, version, title, content, m
         "type": "page",
         "title": title,
         "space": {
-            "key": space
+            "key": spaceKey
         },
         "version": {
             "number": version,
@@ -219,7 +178,7 @@ Confluence.prototype.putContent = function(space, id, version, title, content, m
         }
     };
     
-    var url = this.config.baseUrl + "/rest/api/content/" + id + "?expand=version";
+    var url = this.config.server + "/rest/api/content/" + id + "?expand=version";
 
     request
         .put(url)
@@ -253,7 +212,7 @@ Confluence.prototype.addLabels = function(id, labels, callback) {
         labeldefs.push(labeldef);
     }
     
-    var url = this.config.baseUrl + "/rest/api/content/" + id + "/label";
+    var url = this.config.server + "/rest/api/content/" + id + "/label";
 
     request
         .post(url)
@@ -263,9 +222,9 @@ Confluence.prototype.addLabels = function(id, labels, callback) {
             callback(err, res);
         });
 
-        if (this.config.debug) {
-            console.log("POST: " + url);
-        }
+    if (this.config.debug) {
+        console.log("POST: " + url);
+    }
 };
 
 
