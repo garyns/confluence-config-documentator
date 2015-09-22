@@ -22,7 +22,7 @@
     "atlassian"
   ],
   "engines": {
-    "node": ">=0.10.3 <0.12"
+    "node": "<=0.12"
   },
   "author": "Gary Smart (http://smart-itc.com.au)",
   "license": "MIT"

@@ -38,7 +38,7 @@ if (process.argv.length <= 2) {
     console.log("\nFor more information " + process.argv[1] + " --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     
     checkForNewVersion();
-    process.exit(1);
+    return;
 }
 
 var ops = stdio.getopt({
