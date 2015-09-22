@@ -13,9 +13,10 @@ Now you can type `confdoc` on the command line.
 
 ## GIT Cloning
 
-If you are cloning / folking from GIT, run the following to install dependencies.
+If you are cloning / folking from GIT, run `npm install` to install dependencies.
 
 ```
+git clone https://github.com/garyns/confluence-config-documentator
 cd confluence-config-documentator
 npm install
 ```
