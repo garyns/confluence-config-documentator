@@ -1,6 +1,6 @@
 {
   "name": "confluence-config-documentator",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Create or update pages in Confluence to document configuration files",
   "main": "confdoc.js",
   "dependencies": {
@@ -13,16 +13,17 @@
   "bin": {
     "confdoc": "confdoc.js"
   },
-  "repository" :
-  {
-    "type" : "git",
-    "url" : "https://github.com/garyns/confluence-config-documentator"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garyns/confluence-config-documentator"
   },
   "keywords": [
     "confluence",
     "atlassian"
   ],
-  "engines" : { "node" : ">=0.10.3 <0.12" },
+  "engines": {
+    "node": ">=0.10.3 <0.12"
+  },
   "author": "Gary Smart (http://smart-itc.com.au)",
   "license": "MIT"
 }
