@@ -1,6 +1,6 @@
 # Confluence Config Documentator (confdoc)
 
->A command line utility to help document textual configurations files in Atlassian Confluence.
+>A command line utility to document textual configurations files in Atlassian Confluence.
 
 The name is a mouth full, but the concept behind confdoc is simple - to create and update Confluence pages with the content of a configuration text file (or any text file for that matter).
 
@@ -13,7 +13,7 @@ Now you can type `confdoc` on the command line.
 
 ## GIT Cloning
 
-If you are cloning / folking from GIT, run `npm install` to install dependencies.
+If you are cloning / forking from GIT, run `npm install` to install dependencies.
 
 ```
 git clone https://github.com/garyns/confluence-config-documentator
@@ -136,7 +136,7 @@ confdoc --server http://myconfluenceserver.com --username myusername --password 
 ## Configuration files = {code} marcos
 The uploade file is added to a Confluence Page using a {code} macro. The title of the macro is the uploaded file plus a time stamp, Eg "/etc/httpd/conf/httpd.conf (2015-09-23, 6:45:42am)
 
-When updating a page, confdoc looks for a {code} macro with a title matching the file name of the configuration file. If a {code} macro is found, it is updated. Otherwise a new {code} macro is appended to the page. This means you can add your own content to the Confluence Page and it will be perserved.
+When updating a page, confdoc looks for a {code} macro with a title matching the file name of the configuration file. If a {code} macro is found, it is updated. Otherwise a new {code} macro is appended to the page. This means you can add your own content to the Confluence Page and it will be preserved.
 
 ![Conf1](https://raw.githubusercontent.com/garyns/confluence-config-documentator/master/doc/conf1.jpg)
 
