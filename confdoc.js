@@ -9,6 +9,7 @@ var os = require("os");
 var Confluence = require("./Confluence");
 var selfupdate = require('selfupdate');
 var packageJSON = require('./package.json');
+var md5 = require("md5");
 
 var userConfigJSON = {
     username: null,
@@ -34,7 +35,8 @@ if (os.homedir) {
 if (process.argv.length <= 2) {
     
     console.log(packageJSON.name + " " + packageJSON.version);
-    console.log("\nUsage " +  process.argv[1] + " --server <confluence_server_url>  --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade]>");
+    console.log("\nUsage " +  process.argv[1] + " --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade] <input_file>");
+    console.log("Use @ for input_file to pipe from stdin");
     console.log("\nFor more information " + process.argv[1] + " --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     
     checkForNewVersion();
@@ -49,6 +51,7 @@ var ops = stdio.getopt({
     'server': {key: 's', args: 1, description: 'Confluence Server URL', mandatory: !userConfigJSON.server, default:userConfigJSON.server},
     'username': {key: 'u', args: 1, description: 'Confluence Username', mandatory: !userConfigJSON.username, default:userConfigJSON.username},
     'password': {key: 'p', args: 1, description: 'Confluence Password', mandatory: !userConfigJSON.password, default:userConfigJSON.password},
+    'force': {key: 'f', description: 'Force page update even if no change in content', default:false},
     'spaceKey': {key: 'k', args:1, description: "Confluence Space Key", mandatory: false, default:userConfigJSON.spaceKey},
     'parentId': {key: 'o', args:1, description: "Confluence Parent Page Id (when creating new page. Space root used if not specified)", mandatory: false, default:userConfigJSON.parentId},
     'pageId': {key: 'i', args:1, description: "Confluence Page Id (if not specified, title will be used to find page.)", mandatory: false, default: null},
@@ -58,8 +61,10 @@ var ops = stdio.getopt({
 });
 
 var file = ops['args'] ? ops['args'][0] : null;
-if (file !== null) {
+if (file !== null && file !== "@") {
     file = path.resolve(file); // Absolute file.
+} else {
+    file = null;
 }
 
 var config = {
@@ -67,6 +72,7 @@ var config = {
     verbose: ops['verbose'],
     quiet: ops['verbose'] ? false : ops['quiet'],
     noupgrade: ops['noupgrade'],
+    force: ops['force'],
     
     // If the settings are not specified in 'file' the following defaults are used.
     defaultTitle: ops['title'],
@@ -80,7 +86,7 @@ var config = {
         username: ops['username'],
         password: ops['password'],
         server:  ops['server'],
-        debug: false
+        debug: ops['verbose']
     }
     
 } // config
@@ -123,23 +129,23 @@ getContent(file, function(err, content) {
 /**
  * Get file content or read from stdin.
  */
-function getContent(file, callback) {
+function getContent(infile, callback) {
     
-    if (file !== null) {
+    if (infile !== null) {
         
         try {
             
-          var stats = fs.lstatSync(file);
+          var stats = fs.lstatSync(infile);
           
           if (!stats.isFile()) {
              throw "Not File";
           }
           
-          var content = fs.readFileSync(file).toString();
+          var content = fs.readFileSync(infile).toString('utf8');
           
         } catch (e) {
             
-          callback("Could not find file " + file, null);
+          callback("Could not find file " + infile, null);
           
         }
         
@@ -152,6 +158,7 @@ function getContent(file, callback) {
          */
         
         stdio.read(function(content) {
+            file = "STDIN";
             callback(null, content);
         })
     
@@ -313,7 +320,7 @@ function checkAttributes(config, file, content, callback) {
     
     if (config.verbose || !config.quiet) {
         
-      console.log(file.yellow);
+      console.log("File:     " + file);
       console.log("SpaceKey: " + (typeof pageatts.spaceKey === 'string' ? pageatts.spaceKey : ""));
       console.log("Title:    " + pageatts.title);
       console.log("PageId:   " + (pageatts.pageId ? pageatts.pageId : ""));
@@ -390,7 +397,7 @@ function updatePageAtts(config, pageatts, callback) {
         
         confluence.findContentByPageTitle(pageatts.spaceKey, pageatts.title, "body.storage,version", function(err, response) {
      
-            if (response.statusCode && response.statusCode !== 200) {
+            if (response && response.statusCode && response.statusCode !== 200) {
                 
                 if (config.verbose) {
                     callback(err);
@@ -432,7 +439,21 @@ function updatePageAtts(config, pageatts, callback) {
  */
 function updatePage(config, pageatts, content) {
     
-    pageatts.body = updateCodeMacro(pageatts.file, pageatts.body, content);
+    var d = updateCodeMacro(pageatts.file, pageatts.body, content);
+    pageatts.body  = d.body;
+    contentChanged = d.changed;
+  
+    if (config.verbose && contentChanged) {
+        console.log("File content has changed.".yellow);
+
+    } else if (config.verbose && !contentChanged) {
+        console.log("File content has not changed.".yellow);
+    }
+    
+    if (!contentChanged && !config.force) {
+        console.log((pageatts.pageId + " "  + pageatts.title + " no content change detected. Use --force to update.").green);
+        return;
+    }
     
     if (pageatts.pageId === null) {
         
@@ -449,7 +470,6 @@ function updatePage(config, pageatts, content) {
                 } else {
                     console.error(response);
                 }
-                
                 
             } else {
                 
@@ -473,7 +493,7 @@ function updatePage(config, pageatts, content) {
         // Updaing an existing page (because we have a page id).
         //        
         
-        var minorEdit = true;
+        var minorEdit = !contentChanged;
         confluence.putPageContent(pageatts.spaceKey, pageatts.pageId, pageatts.version+1, pageatts.title, pageatts.body, minorEdit, function(err, response) {
             
             if (err) {
@@ -482,8 +502,7 @@ function updatePage(config, pageatts, content) {
                     console.error(err);
                 } else {
                     console.error(response);
-                }
-                
+                }    
                 
             } else {
                 
@@ -533,6 +552,7 @@ function updateCodeMacro(file, body, content) {
     var pattern = /<ac:structured-macro[\S\s.]*?ac:name="code"[\S\s.]*?>([\S\s.]*?)<\/ac:structured-macro>/g;
     var matchesMacro = body ? body.match(pattern) : false;
     var codeBlockFound = false;
+    var contentChanged = false;
 
     if (matchesMacro) {
         
@@ -555,7 +575,14 @@ function updateCodeMacro(file, body, content) {
                 
                 if (matchCode) {
                     
-                    var newTitle = file + " (" + now + ")";
+                    var hash = md5(content);
+                    var oldHash = md5(matchCode[1]);
+                    
+                    if (hash != oldHash) {
+                        contentChanged = true;
+                    }
+                    
+                    var newTitle = file + " (" + now + ") {" + hash + "}";
  
                     var m2 = m.replace(matchCode[1], content);
                     m2 = m2.replace(titleMatches[1], newTitle);
@@ -568,11 +595,15 @@ function updateCodeMacro(file, body, content) {
         }
         
         if (!codeBlockFound) {
-            body += createCodeMacro(file + " (" + now + ")", content);
+            var hash = md5(content);
+            body += createCodeMacro(file + " (" + now + ") {" + hash + "}", content);
         }
 
-         //process.exit();
-         return body;
+        return {
+           body: body,
+           changed: contentChanged
+        };
+        //return body;
          
     } else {
         
@@ -581,7 +612,10 @@ function updateCodeMacro(file, body, content) {
         }
         
         body += createCodeMacro(file + " (" + now + ")", content);
-        return body;
+        return {
+           body: body,
+           changed: false
+        };
     }
     
 } // updateCodeMacro()
@@ -667,4 +701,22 @@ console.error = function(err) {
         
         
     }
+}
+
+console.debug = function() {
+    
+    for (var i = 0; i < arguments.length; i++) {
+      var t = arguments[i];
+    
+     if (typeof t === "string") {
+        
+        console.log(t.yellow);
+    
+      } else {
+        
+        console.log(JSON.stringify(t).yellow);
+      }
+        
+    }
+
 }

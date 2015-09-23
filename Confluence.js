@@ -20,7 +20,7 @@ Confluence.prototype.getHomePage = function(space, callback) {
     var url = config.server + "/rest/api/space?spaceKey=" + space;
     
     if (this.config.debug) {
-        console.log("GET: " + url);
+        console.debug("GET: " + url);
     }    
 
     request
@@ -37,7 +37,7 @@ Confluence.prototype.getHomePage = function(space, callback) {
                         .get(url)
                         .auth(config.username, config.password)
                         .end(function(err, res){
-                            callback(err, res.body);
+                            callback(err, res && res.body ? res.body : null);
                         });                      
                 }
                 catch (e) {
@@ -60,11 +60,11 @@ Confluence.prototype.getContentById = function(id, expand, callback) {
         .get(url)
         .auth(this.config.username, this.config.password)
         .end(function(err, res){
-           callback(err, res.body);
+           callback(err, res && res.body ? res.body : null);
         });
         
     if (this.config.debug) {
-        console.log("GET: " + url);
+        console.debug("GET: " + url);
     }
 };
 
@@ -85,11 +85,11 @@ Confluence.prototype.findContentByPageTitle = function(space, title, expand, cal
         .get(url)
         .auth(this.config.username, this.config.password)
         .end(function(err, res){
-            callback(err, res.body);
+            callback(err, res && res.body ? res.body : null);
         });
         
     if (this.config.debug) {
-        console.log("GET: " + url);
+        console.debug("GET: " + url);
     }
 
 };
@@ -128,8 +128,9 @@ Confluence.prototype.postPageContent = function(spaceKey, title, content, parent
                 callback(err, res.body);
             });
             
+            
         if (config.debug) {
-            console.log("POST: " + url);
+            console.debug("POST: " + url, page);
         }            
     }
 
@@ -154,6 +155,8 @@ Confluence.prototype.postPageContent = function(spaceKey, title, content, parent
 };
 
 Confluence.prototype.putPageContent = function(spaceKey, id, version, title, content, minorEdit, callback) {
+    
+    var config = this.config;
     
     if (minorEdit === undefined) {
         minorEdit = true;
@@ -190,7 +193,7 @@ Confluence.prototype.putPageContent = function(spaceKey, id, version, title, con
         });
         
         if (config.debug) {
-            console.log("PUT: " + url);
+            console.debug("PUT: " + url, page);
         }
 
 };
@@ -223,7 +226,7 @@ Confluence.prototype.addLabels = function(id, labels, callback) {
         });
 
     if (this.config.debug) {
-        console.log("POST: " + url);
+        console.debug("POST: " + url, labeldefs);
     }
 };
 

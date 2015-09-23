@@ -35,6 +35,7 @@ The following options are supported:
   -s, --server <ARG1>   	Confluence Server URL (mandatory)
   -u, --username <ARG1> 	Confluence Username (mandatory)
   -p, --password <ARG1> 	Confluence Password (mandatory)
+  -f, --force           	Force page update even if no change in content
   -k, --spaceKey <ARG1> 	Confluence Space Key
   -o, --parentId <ARG1> 	Confluence Parent Page Id (when creating new page. Space root used if not specified)
   -i, --pageId <ARG1>   	Confluence Page Id (if not specified, title will be used to find page.)
