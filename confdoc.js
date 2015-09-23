@@ -352,10 +352,7 @@ function checkAttributes(config, file, content, callback) {
  */
 function updatePageAtts(config, pageatts, callback) {    
     
-    if (pageatts.pageId) {
-        
-        pageatts.version = page.version.number;
-        pageatts.body = page.body.storage.value;        
+    if (pageatts.pageId) {        
 
         confluence.getContentById(pageatts.pageId, "body.storage,version", function(err, page) {
             
