@@ -589,7 +589,7 @@ function updateCodeMacro(file, body, content) {
  * Check is a new version if avaiable and output messge if there is.
  */
 function checkForNewVersion() {
-    if (config && (!config.noupgrade && !config.quiet)) {
+    if (!config || (!config.noupgrade && !config.quiet)) {
         selfupdate.isUpdated(packageJSON, function(error, isUpdated) {
             if(error) throw error;
             
