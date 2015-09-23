@@ -434,7 +434,6 @@ function updatePage(config, pageatts, content) {
     
     pageatts.body = updateCodeMacro(pageatts.file, pageatts.body, content);
     
-    
     if (pageatts.pageId === null) {
         
         //
@@ -533,6 +532,7 @@ function updateCodeMacro(file, body, content) {
     
     var pattern = /<ac:structured-macro[\S\s.]*?ac:name="code"[\S\s.]*?>([\S\s.]*?)<\/ac:structured-macro>/g;
     var matchesMacro = body ? body.match(pattern) : false;
+    var codeBlockFound = false;
 
     if (matchesMacro) {
         
@@ -560,10 +560,15 @@ function updateCodeMacro(file, body, content) {
                     var m2 = m.replace(matchCode[1], content);
                     m2 = m2.replace(titleMatches[1], newTitle);
                     body = body.replace(m, m2);
+                    codeBlockFound = true;
                 }
                 
             }                
         
+        }
+        
+        if (!codeBlockFound) {
+            body += createCodeMacro(file + " (" + now + ")", content);
         }
 
          //process.exit();
