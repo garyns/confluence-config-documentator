@@ -72,19 +72,18 @@ var config = {
     force: ops['force'],
     
     // If the settings are not specified in 'file' the following defaults are used.
-    defaultTitle: ops['title'],
-    defaultPageId: ops['pageId'],
-    defaultParentId: ops['parentId'],
-    defaultSpaceKey: ops['spaceKey'],
-    //defaultStatus: typeof ops['status'] === "string" ? ops['status'].split(",") : [],
-    defaultLabels: typeof ops['labels'] === "string" ? ops['labels'].split(",") : [],
+    title: ops['title'],
+    pageId: ops['pageId'],
+    parentId: ops['parentId'],
+    spaceKey: ops['spaceKey'],
+    //status: typeof ops['status'] === "string" ? ops['status'].split(",") : [],
+    labels: typeof ops['labels'] === "string" ? ops['labels'].split(",") : [],
     
-    confluenceConfig: {
-        username: ops['username'],
-        password: ops['password'],
-        server:  ops['server'],
-        debug: ops['verbose']
-    }
+    username: ops['username'],
+    password: ops['password'],
+    server:  ops['server'],
+    debug: ops['verbose']
+    
     
 } // config
 
