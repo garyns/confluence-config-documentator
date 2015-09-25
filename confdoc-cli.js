@@ -104,7 +104,7 @@ function checkForNewVersion() {
     }
 } // checkForNewVersion()
 
-var Confdoc = require("./confdoc");
+var Confdoc = require("lib/confdoc");
 var confdoc = new Confdoc(config);
 
 /**
