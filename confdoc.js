@@ -96,6 +96,61 @@ var confluence = new Confluence(config.confluenceConfig);
 
 //------------------------------------------------------------------------------
 
+/**
+ * Log debug messages to console.
+ */
+console.debug = function() {
+    
+    for (var i = 0; i < arguments.length; i++) {
+      var t = arguments[i];
+    
+     if (typeof t === "string") {
+        
+        console.log(t.yellow);
+    
+      } else {
+        
+        console.log(JSON.stringify(t).yellow);
+      }
+        
+    }
+
+}
+
+/**
+ * Log error messages to console.
+ */
+console.error = function(err) {
+    
+    if (typeof err === "string") {
+        console.log(err.red.bold);
+    } else {
+        
+        var output = false;
+        
+        if (err.message) {
+            console.log(err.message.red.bold);
+            output = true;
+        }
+        
+        if (err.response && err.response.message) {
+            console.log(err.response.message.red.bold);
+            output = true;
+        }
+        
+       if (err.response && err.response.text && err.response.text.message) {
+            console.log(err.esponse.text.message.red.bold);
+            output = true;
+        }        
+        
+        if (!output) {
+            console.log(JSON.stringify(err).red.bold);
+        }
+        
+        
+    }
+}
+
 checkForNewVersion();
 
 /**
@@ -406,13 +461,18 @@ function updatePageAtts(config, pageatts, callback) {
                 };
                 
                 return;
+            
             } else if (err) {
+                
                 callback(err, null);
                 return;
+            
             } else {
-                
+        
                 if (response.results.length === 0) {
-                                        
+                    
+                    // No Page. It's a new page.
+                    
                     callback(null, pageatts);
                     return;
                     
@@ -443,16 +503,19 @@ function updatePage(config, pageatts, content) {
     pageatts.body  = d.body;
     contentChanged = d.changed;
   
-    if (config.verbose && contentChanged) {
-        console.log("File content has changed.".yellow);
-
-    } else if (config.verbose && !contentChanged) {
-        console.log("File content has not changed.".yellow);
-    }
+    if (pageatts.pageId) {
     
-    if (!contentChanged && !config.force) {
-        console.log((pageatts.pageId + " "  + pageatts.title + " no content change detected. Use --force to update.").green);
-        return;
+        if (config.verbose && contentChanged) {
+            console.log("File content has changed.".yellow);
+    
+        } else if (config.verbose && !contentChanged) {
+            console.log("File content has not changed.".yellow);
+        }
+        
+        if (!contentChanged && !config.force) {
+            console.log((pageatts.pageId + " "  + pageatts.title + " no content change detected. Use --force to update.").green);
+            return;
+        }
     }
     
     if (pageatts.pageId === null) {
@@ -669,54 +732,5 @@ function createStatusMacro(title, color, outline) {
 }
 */
 
-/**
- * Log error messages to console.
- */
-console.error = function(err) {
-    
-    if (typeof err === "string") {
-        console.log(err.red.bold);
-    } else {
-        
-        var output = false;
-        
-        if (err.message) {
-            console.log(err.message.red.bold);
-            output = true;
-        }
-        
-        if (err.response && err.response.message) {
-            console.log(err.response.message.red.bold);
-            output = true;
-        }
-        
-       if (err.response && err.response.text && err.response.text.message) {
-            console.log(err.esponse.text.message.red.bold);
-            output = true;
-        }        
-        
-        if (!output) {
-            console.log(JSON.stringify(err).red.bold);
-        }
-        
-        
-    }
-}
 
-console.debug = function() {
-    
-    for (var i = 0; i < arguments.length; i++) {
-      var t = arguments[i];
-    
-     if (typeof t === "string") {
-        
-        console.log(t.yellow);
-    
-      } else {
-        
-        console.log(JSON.stringify(t).yellow);
-      }
-        
-    }
 
-}
