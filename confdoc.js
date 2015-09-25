@@ -35,9 +35,9 @@ if (os.homedir) {
 if (process.argv.length <= 2) {
     
     console.log(packageJSON.name + " " + packageJSON.version);
-    console.log("\nUsage " +  process.argv[1] + " --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade] <input_file>");
+    console.log("\nUsage confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade] <input_file>");
     console.log("Use @ for input_file to pipe from stdin");
-    console.log("\nFor more information " + process.argv[1] + " --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
+    console.log("\nFor more information confdoc --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     
     checkForNewVersion();
     return;
