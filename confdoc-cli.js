@@ -32,7 +32,7 @@ if (os.homedir) {
 if (process.argv.length <= 2) {
     
     console.log(packageJSON.name + " " + packageJSON.version);
-    console.log("\nUsage confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--quiet] [--noupgrade] <input_file>");
+    console.log("\nUsage confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>");
     console.log("Use @ for input_file to pipe from stdin");
     console.log("\nFor more information confdoc --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     
@@ -53,7 +53,7 @@ var ops = stdio.getopt({
     'parentId': {key: 'o', args:1, description: "Confluence Parent Page Id (when creating new page. Space root used if not specified)", mandatory: false, default:userConfigJSON.parentId ? userConfigJSON.parentId : null},
     'pageId': {key: 'i', args:1, description: "Confluence Page Id (if not specified, title will be used to find page.)", mandatory: false, default: null},
     'title': {key: 't', args:1, description: "Confluence Page Title (defaults to hostname:filename)", mandatory: false, default: null},
-    //'status': {key: 'a', multiple: true, description: "Add a static macro", mandatory: false, default: null},
+    'macro': {key: 'm', args:1, multiple: false, description: "Macro type that file content is wrapped in (html, panel, code)", mandatory: false, default: 'code'},
     'labels': {key: 'l', multiple: true, description: "Add page labels. Comma separated.", mandatory: false, default: null}
 });
 
@@ -78,6 +78,7 @@ var config = {
     spaceKey: ops['spaceKey'],
     //status: typeof ops['status'] === "string" ? ops['status'].split(",") : [],
     labels: typeof ops['labels'] === "string" ? ops['labels'].split(",") : [],
+    macro: ops['macro'],
     
     username: ops['username'],
     password: ops['password'],
