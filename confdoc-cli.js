@@ -142,14 +142,21 @@ console.error = function(err) {
     }
 }
 
-confdoc.upload(file, function(err, content) {
-    
-    if (err) {
+confdoc.upload(file, function(err, msg, code) {
+     
+    if (code === "NO_CHANGE") {
+        
+        console.log((msg + " Use --force to update.").green);
+        
+    } else {
+        
+      if (err) {
         console.error(err);
         process.exit(1);
-    }
+      }
     
-    console.log(content.green);
+      console.log(msg.green);
+    }
     
 });
 
