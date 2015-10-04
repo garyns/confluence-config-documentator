@@ -42,7 +42,7 @@ if (process.argv.length <= 2) {
 
 var ops = stdio.getopt({
     _meta_: {args: 1},
-    'quiet': {key: 'q', description: 'Suspress non-error output', default:false},
+    'quiet': {key: 'e', description: 'Suspress non-error output', default:false},
     'verbose': {key: 'v', description: 'Verbose output', default:false},
     'noupgrade': {key:"n", description: 'Suspress new version check', default:false},
     'server': {key: 's', args: 1, description: 'Confluence Server URL', mandatory: !userConfigJSON.server, default:userConfigJSON.server},
@@ -53,6 +53,7 @@ var ops = stdio.getopt({
     'parentId': {key: 'o', args:1, description: "Confluence Parent Page Id (when creating new page. Space root used if not specified)", mandatory: false, default:userConfigJSON.parentId ? userConfigJSON.parentId : null},
     'pageId': {key: 'i', args:1, description: "Confluence Page Id (if not specified, title will be used to find page.)", mandatory: false, default: null},
     'title': {key: 't', args:1, description: "Confluence Page Title (defaults to hostname:filename)", mandatory: false, default: null},
+    'query': {key: 'q', args:1, description: "Query used to find Confluence Page. Default to title", mandatory: false, default: null},
     'macro': {key: 'm', args:1, multiple: false, description: "Macro type that file content is wrapped in (html, panel, code)", mandatory: false, default: 'code'},
     'labels': {key: 'l', multiple: true, description: "Add page labels. Comma separated.", mandatory: false, default: null}
 });
@@ -72,6 +73,7 @@ var config = {
     force: ops['force'],
     
     // If the settings are not specified in 'file' the following defaults are used.
+    query: ops['query'],
     title: ops['title'],
     pageId: ops['pageId'],
     parentId: ops['parentId'],

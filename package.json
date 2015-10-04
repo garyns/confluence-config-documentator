@@ -26,5 +26,11 @@
     "node": ">=0.12"
   },
   "author": "Gary Smart (http://smart-itc.com.au)",
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "LICENSE", 
+    "README.MD",
+    "confdoc-cli.js",
+    "lib"
+  ]
 }
