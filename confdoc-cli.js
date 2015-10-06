@@ -84,7 +84,7 @@ var config = {
     
     username: ops['username'],
     password: ops['password'],
-    server:  ops['server'],
+    server:  ops['server'].endsWith("/") ? ops['server'].substring(0, ops['server'].length-1) : ops['server'],  // Ensure server does not end with a /
     debug: ops['verbose']
     
     
@@ -114,7 +114,12 @@ var confdoc = new Confdoc(config);
  * Log error messages to console.
  */
 console.error = function(err) {
-    
+   
+    if (config.verbose) {
+       console.log(JSON.stringify(err, null, 2).red.bold);
+       return;
+    }
+   
     if (typeof err === "string") {
         console.log(err.red.bold);
     } else {
