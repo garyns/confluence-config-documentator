@@ -4,6 +4,8 @@
 
 The name is a mouth full, but the concept behind confdoc is simple - to create and update Confluence pages with the content of a configuration text file (or any text file for that matter).
 
+[![NPM](https://nodei.co/npm/confluence-config-documentator.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/confluence-config-documentator/)
+
 ## Installation
 
 ```
@@ -25,7 +27,7 @@ npm install
 ## Usage
 
 ```
-confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>
+confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--query <string>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>
 ```
 ```
 The following options are supported:
