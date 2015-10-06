@@ -29,8 +29,8 @@ confdoc --server <confluence_server_url> --username <username> --password <passw
 ```
 ```
 The following options are supported:
-  -q, --quiet           	Suspress non-error output
-  -v, --verbose         	Verbose output
+  -e, --quiet           	Suspress non-error output
+  -v, --verbose         	Verbose output and full error messages
   -n, --noupgrade       	Suspress new version check
   -s, --server <ARG1>   	Confluence Server URL ("http://jira.smart-itc.com.au/conf" by default)
   -u, --username <ARG1> 	Confluence Username ("freds" by default)
@@ -40,6 +40,7 @@ The following options are supported:
   -o, --parentId <ARG1> 	Confluence Parent Page Id (when creating new page. Space root used if not specified)
   -i, --pageId <ARG1>   	Confluence Page Id (if not specified, title will be used to find page.)
   -t, --title <ARG1>    	Confluence Page Title (defaults to hostname:filename)
+  -q, --query <ARG1>    	Query used to find Confluence Page. Default to title
   -m, --macro <ARG1>    	Macro type that file content is wrapped in (html, panel, code) ("code" by default)
   -l, --labels <ARG1>   	Add page labels. Comma separated. (multiple)
 ```
@@ -51,6 +52,7 @@ You can add tags to files to override the above arguments. This helps make uploa
 Supported tags are
 ```
 ##Title: <string>
+##Query: <string>
 ##SpaceKey: <string>
 ##Macro: <string>
 ##PageId: <int>
@@ -160,9 +162,14 @@ No. confdoc never modifies the input file.
 
 You need to edit your files manually and add the tags yourself. confdoc never modifies your files.
 
+**I'm getting an error "Not Found"**
+
+Check your Confluence Server URL. Use the `--verbose` option to get a more detailed error message. It will likely mention a 404 status.
+
 **I'm getting an error. What can I do?**
 
 Use the `--verbose` option. This can help output more verbose error messages.
+
 
 **How do I find a Page's Id for use with --parentId or --pageId?**
 

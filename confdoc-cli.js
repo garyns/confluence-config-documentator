@@ -43,7 +43,7 @@ if (process.argv.length <= 2) {
 var ops = stdio.getopt({
     _meta_: {args: 1},
     'quiet': {key: 'e', description: 'Suspress non-error output', default:false},
-    'verbose': {key: 'v', description: 'Verbose output', default:false},
+    'verbose': {key: 'v', description: 'Verbose output and full error messages', default:false},
     'noupgrade': {key:"n", description: 'Suspress new version check', default:false},
     'server': {key: 's', args: 1, description: 'Confluence Server URL', mandatory: !userConfigJSON.server, default:userConfigJSON.server},
     'username': {key: 'u', args: 1, description: 'Confluence Username', mandatory: !userConfigJSON.username, default:userConfigJSON.username},
