@@ -19,12 +19,9 @@ var config = {
     verbose: false
 }
 
-loadConfig();
-
-var confdoc = new Confdoc(config);
-
 var ops = stdio.getopt({
     'verbose': {key: 'v', description: 'Verbose output', default:false},
+    'config': {key: 'c', description: 'Configuration File (defaults to ~/.confdoc)', mandatory:false, args:1},
     'watch': {key: 'w', description: 'Watch files', mandatory:false, args:0},
     'add': {key: 'a', description: 'Add file', mandatory:false, multiple: true},
     'remove': {key: 'r', description: 'Remove file', mandatory:false, multiple: true},
@@ -70,6 +67,10 @@ console.error = function(err) {
         
     }
 }
+
+loadConfig();
+
+var confdoc = new Confdoc(config);
 
 var actionPerformed = false;
 
@@ -344,29 +345,35 @@ function saveConfig() {
 }
 
 function loadConfig() {
-    if (os.homedir) {
+    
+    if (ops['config'] && (typeof ops['config'] === "string")) {
+        
+        configFile = ops['config'];
+        
+    } else if (os.homedir) {
         
         configFile = os.homedir() + '/.confdoc';
         
+    }
+        
+    try {
+          stats = fs.statSync(configFile);
+          
         try {
-              stats = fs.statSync(configFile);
-              
-            try {
-                /**
-                 * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
-                 */
-                config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-                
-            } catch (e) {
-                console.log(("Failed to parse JSON in " + configFile).red.bold);
-                showUsage();
-                process.exit(1);       
-            }         
-                  
+            /**
+             * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
+             */
+            config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+            
         } catch (e) {
-            // File not found.
-            console.log(("Failed to load configuration in " + configFile).red.bold);
-            process.exit(1);        
-        }
+            console.log(("Failed to parse JSON in " + configFile).red.bold);
+            showUsage();
+            process.exit(1);       
+        }         
+              
+    } catch (e) {
+        // File not found.
+        console.log(("Failed to load configuration in " + configFile).red.bold);
+        process.exit(1);        
     }    
 }

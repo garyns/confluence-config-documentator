@@ -1,4 +1,4 @@
-# Confluence Config Documentator (confdoc)
+# Confluence Config Documentator (confdoc & confwatch)
 
 >A command line utility to document textual configurations files in Atlassian Confluence.
 
@@ -11,7 +11,7 @@ The name is a mouth full, but the concept behind confdoc is simple - to create a
 ```
   npm install -g confluence-config-documentator
 ```
-Now you can type `confdoc` on the command line.
+Now you can type `confdoc` and `confwatch` on the command line.
 
 ## GIT Cloning
 
@@ -24,16 +24,19 @@ npm install
 ```
 
 
-## Usage
+## Confdoc Usage
+
+`confdoc` is an commline tool to upload a file to Confluence.
 
 ```
-confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--query <string>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>
+confdoc --server <confluence_server_url> --username <username> --password <password> [--config <file>] [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--query <string>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>
 ```
 ```
 The following options are supported:
   -e, --quiet           	Suspress non-error output
   -v, --verbose         	Verbose output and full error messages
   -n, --noupgrade       	Suspress new version check
+  -c, --config <ARG1>   	Configuration File (defaults to ~/.confdoc)
   -s, --server <ARG1>   	Confluence Server URL ("http://jira.smart-itc.com.au/conf" by default)
   -u, --username <ARG1> 	Confluence Username ("freds" by default)
   -p, --password <ARG1> 	Confluence Password ("fourty@40" by default)
@@ -46,6 +49,49 @@ The following options are supported:
   -m, --macro <ARG1>    	Macro type that file content is wrapped in (html, panel, code) ("code" by default)
   -l, --labels <ARG1>   	Add page labels. Comma separated. (multiple)
 ```
+A little later we'll go over some examples.
+
+## Confwatch Usage
+
+`confwatch` will monitor files for changes and upload them to Confluence. Internally confwatch uses confdoc.
+
+```
+confwatch [--verbose] [--add <file>] [--remove <file>] [--list] [--watch]
+```
+
+```
+The following options are supported:
+  -v, --verbose       	Verbose output
+  -c, --config <ARG1> 	Configuration File (defaults to ~/.confdoc)
+  -w, --watch         	Watch files
+  -a, --add <ARG1>    	Add file (multiple)
+  -r, --remove <ARG1> 	Remove file (multiple)
+  -l, --list          	List watched files
+```
+
+### Setup
+Unlike `confdoc`, `confwatch` **requires** a configuration file. This can be specified via the `--config` parameter otherwise the the default file `~/.confdoc` is used if it exists. Details of the configuration file are discussed later.
+
+### Watching Files
+**Before using `confwatch`, make sure you can successfully upload files using `confdoc`.**
+
+Lets say you want to monitor these files for changes:
+* /etc/my.cnf
+* /etc/httpd/conf/httpd.conf
+
+```
+confwatch --add /etc/my.cnf --add /etc/httpd/conf/httpd.conf
+```
+This just adds them to the list of files that `confwatch` will monitor. To actually monitor the files:
+```
+confwatch --watch
+```
+Or prehaps add something similar to this to /etc/rc.local (or equivalent)
+```
+confwatch --watch > /var/log/confwatch.log &
+```
+Now whenever one of the watched files changes it will be uploaded to Confluence.
+`confwatch` will update the configuration file with the watched files.
 
 ## In-file Usage
 
@@ -62,7 +108,7 @@ Supported tags are
 ##Labels: <string, string, ...>
 ```
 
-### The Tag Prefix (##)
+## The Tag Prefix (##)
 
 The above examples prefix tags with ##. The tag prefix is actually any two identical characters. So you just use whatever the file's comment syntax is twice, with an optional space. For instance:
 
@@ -80,11 +126,17 @@ Or an INI file:
 ...
 ```
 
-### Defaults ~/.confdoc
+## Configuration Files
 
-If you create a file called `.confdoc` in your home directory then defaults will be read from this file. All parameters are optional, and the file must be valid JSON. **This feature is only supported in NodeJS 4.1.0+**
+The configuration file is optional for `confdoc` because all parameters can be specified on the command line. For `confwatch` a configuration file is required.
 
-The following defaults are supported:
+You can specify a configuration file with the `--config` parameter. 
+
+If `--config` is not specified and the file `~/.confdoc` exists, it is used (**This feature is only supported in NodeJS 4.1.0+**). 
+
+The configuration file must be valid JSON. 
+
+The following properties are supported:
 
 ```
 {
@@ -92,13 +144,16 @@ The following defaults are supported:
   "spaceKey": "mySpaceKey",
   "parentId": "12345",
   "username": "myusername",
-  "password": "myPassword"
+  "password": "myPassword",
+  "watch": []
 }
 ```
 
 Remember that *parentId* is only relevant when a new Confluence Page is created.
 
-## Examples
+*watch* is an array of absolute files monitored by `confwatch`. `confwatch --add` and `confwatch --remove` update this array.
+
+## Confdoc Examples
 
 The examples assume we are executing the commands on a host called myhost.com.
 

@@ -16,43 +16,24 @@ var userConfigJSON = {
     spaceKey: null
 }
 
-if (os.homedir) {
-    
-    try {
-          stats = fs.statSync(os.homedir() + '/.confdoc');
-          
-        try {
-            /**
-             * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
-             */
-            userConfigJSON = JSON.parse(fs.readFileSync(os.homedir() + '/.confdoc', 'utf8'));
-            
-        } catch (e) {
-            console.log(("Failed to parse JSON in " + os.homedir() + "/.confdoc").red.bold);
-            showUsage();
-            process.exit(1);       
-        }         
-              
-    } catch (e) {
-        // File not found.
-    }
-}
-
 if (process.argv.length <= 2) {
     
     console.log(packageJSON.name + " " + packageJSON.version);
-    console.log("\nUsage confdoc --server <confluence_server_url> --username <username> --password <password> [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--query <string>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>");
+    console.log("\nUsage confdoc --server <confluence_server_url> --username <username> --password <password> [--config <file>] [--spaceKey <key>] [--parentId <id>] [--pageId <id>] [--title <title>] [--query <string>] [--labels <labels>] [--macro <macro>] [--quiet] [--noupgrade] <input_file>");
     console.log("Use @ for input_file to pipe from stdin");
     console.log("\nFor more information confdoc --help\n or visit https://www.npmjs.com/package/confluence-config-documentator");
     
     checkForNewVersion();
     return;
 }
+    
+loadUserConfig();
 
 var ops = stdio.getopt({
     _meta_: {args: 1},
     'quiet': {key: 'e', description: 'Suspress non-error output', default:false},
     'verbose': {key: 'v', description: 'Verbose output and full error messages', default:false},
+    'config': {key: 'c', description: 'Configuration File (defaults to ~/.confdoc)', mandatory:false, args:1},
     'noupgrade': {key:"n", description: 'Suspress new version check', default:false},
     'server': {key: 's', args: 1, description: 'Confluence Server URL', mandatory: !userConfigJSON.server, default:userConfigJSON.server},
     'username': {key: 'u', args: 1, description: 'Confluence Username', mandatory: !userConfigJSON.username, default:userConfigJSON.username},
@@ -177,3 +158,39 @@ confdoc.upload(file, function(err, msg, code) {
 });
 
 
+function loadUserConfig() {
+    
+    if ((process.argv.length === 4) &&
+      ((process.argv[2].toLowerCase() === "--config") || (process.argv[2].toLowerCase() === "--c"))) {
+        
+        configFile = process.argv[3];
+        
+    } else if (os.homedir) {
+        
+        configFile = os.homedir() + '/.confdoc';
+        
+    }
+        
+    try {
+          stats = fs.statSync(configFile);
+          
+        try {
+            /**
+             * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
+             */
+            userConfigJSON = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+            
+            console.log("Loaded configuration from " + configFile);
+            
+        } catch (e) {
+            console.log(("Failed to parse JSON in " + configFile).red.bold);
+            showUsage();
+            process.exit(1);       
+        }         
+              
+    } catch (e) {
+        // File not found.
+        console.log(("Failed to load configuration in " + configFile).red.bold);
+        process.exit(1);        
+    }    
+}
