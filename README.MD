@@ -67,6 +67,7 @@ The following options are supported:
   -a, --add <ARG1>    	Add file (multiple)
   -r, --remove <ARG1> 	Remove file (multiple)
   -l, --list          	List watched files
+  -f, --force         	Force upload of all files now
 ```
 
 ### Setup

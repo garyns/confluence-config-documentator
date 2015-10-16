@@ -25,8 +25,10 @@ var ops = stdio.getopt({
     'watch': {key: 'w', description: 'Watch files', mandatory:false, args:0},
     'add': {key: 'a', description: 'Add file', mandatory:false, multiple: true},
     'remove': {key: 'r', description: 'Remove file', mandatory:false, multiple: true},
-    'list': {key: 'l', description: 'List watched files', mandatory:false, args:0}
+    'list': {key: 'l', description: 'List watched files', mandatory:false, args:0},
+    'force': {key: 'f', description: 'Force upload of all files now', mandatory:false, default:false}
 });
+
 
 
 /**
@@ -70,6 +72,11 @@ console.error = function(err) {
 
 loadConfig();
 
+
+// Update config.
+config.verbose = ops['verbose'];
+config.force = ops['force'];
+
 var confdoc = new Confdoc(config);
 
 var actionPerformed = false;
@@ -93,6 +100,11 @@ if (actionPerformed) {
    saveConfig();
 }
 
+if (ops['force']) {
+    uploadAll();
+    actionPerformed = true;
+}
+
 if (ops['watch']) {
     var watching = watch();
     
@@ -111,8 +123,6 @@ if (!actionPerformed) {
     process.exit(1);
 }
 
-// Update config.
-config.verbose = ops['verbose'];
 
 // Reinitialse on config change.
 function watchConfig() {
@@ -142,6 +152,7 @@ function watchConfig() {
       
       configWatcher.add(configFile);
 }
+
 
 function watch() {
     
@@ -341,6 +352,20 @@ function listFiles() {
         var f = config.watch[i];
         console.log("  " + f);
     }
+}
+
+
+function uploadAll() {
+    
+    if (!config.watch) {
+        console.log("Not watching any files.");
+        return;
+    }
+    
+    for (i in config.watch) {
+        var f = config.watch[i];
+        upload(f);
+    }    
 }
 
 function saveConfig() {
