@@ -4,6 +4,7 @@
   "description": "Create or update pages in Confluence to document configuration files",
   "main": "lib/confdoc.js",
   "dependencies": {
+    "async": "^1.4.2",
     "chokidar": "^1.2.0",
     "colors": "^1.1.2",
     "md5": "^2.0.0",

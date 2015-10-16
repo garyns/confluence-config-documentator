@@ -6,9 +6,9 @@ var fs = require("fs");
 var path = require("path");
 var colors = require('colors');
 var os = require("os");
+var async = require("async");
 var Confdoc = require("./lib/confdoc");
 var watcher  = null;
-    
 var configFile = null;
 
 var config = {
@@ -230,7 +230,7 @@ function watch() {
 }
 
 
-function upload(file) {
+function upload(file, callback) {
     confdoc.upload(file, function(err, msg, code) {
          
         if (code === "NO_CHANGE") {
@@ -249,6 +249,8 @@ function upload(file) {
           
           }
         }
+        
+        callback(err, msg);
         
     });    
 }
@@ -362,10 +364,26 @@ function uploadAll() {
         return;
     }
     
+    var series = [];
+    
     for (i in config.watch) {
         var f = config.watch[i];
-        upload(f);
-    }    
+        
+        var data = {}
+        data.file = f;
+        
+        series.push(function(callback) {
+            
+            upload(this.file, callback);
+            
+        }.bind(data));
+        
+    }
+    
+    async.series(series, function (err, results) {
+        //
+    });
+    
 }
 
 function saveConfig() {
