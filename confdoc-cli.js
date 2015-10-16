@@ -7,7 +7,7 @@ var colors = require('colors');
 var selfupdate = require('selfupdate');
 var packageJSON = require('./package.json');
 var os = require("os");
-var Confdoc = require("./lib");
+var Confdoc = require("./lib/confdoc");
 
 var userConfigJSON = {
     username: null,
