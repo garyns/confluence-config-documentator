@@ -17,15 +17,24 @@ var userConfigJSON = {
 }
 
 if (os.homedir) {
+    
     try {
-        /**
-         * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
-         */
-        userConfigJSON = JSON.parse(fs.readFileSync(os.homedir() + '/.confdoc', 'utf8'));
-        
+          stats = fs.statSync(os.homedir() + '/.confdoc');
+          
+        try {
+            /**
+             * Read default parameters from ~/.confdoc. Any parameters one the command line or defined in the inout file will override these.
+             */
+            userConfigJSON = JSON.parse(fs.readFileSync(os.homedir() + '/.confdoc', 'utf8'));
+            
+        } catch (e) {
+            console.log(("Failed to parse JSON in " + os.homedir() + "/" + configFile).red.bold);
+            showUsage();
+            process.exit(1);       
+        }         
+              
     } catch (e) {
-        // File not found or not parsable.
-        // console.error(e);
+        // File not found.
     }
 }
 
