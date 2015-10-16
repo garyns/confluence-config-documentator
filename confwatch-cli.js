@@ -104,7 +104,9 @@ if (ops['watch']) {
 }
 
 if (!actionPerformed) {
+    console.log("\nWatch files for changes and upload them to Confluence.\n")
     ops.printHelp();
+    console.log("\nFor more information visit https://www.npmjs.com/package/confluence-config-documentator\n");
     process.exit(1);
 }
 

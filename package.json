@@ -14,7 +14,7 @@
   },
   "bin": {
     "confdoc": "confdoc-cli.js",
-    "confdoc": "confwarch-cli.js"
+    "confwatch": "confwatch-cli.js"
   },
   "repository": {
     "type": "git",
