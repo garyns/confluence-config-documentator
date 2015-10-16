@@ -33,6 +33,7 @@
     "LICENSE",
     "README.MD",
     "confdoc-cli.js",
+    "confwatch-cli.js",
     "lib"
   ]
 }
