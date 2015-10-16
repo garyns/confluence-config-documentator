@@ -150,10 +150,12 @@ function watch() {
         watcher = null;
     }
     
+    /*
     if (!config.watch || config.watch.length == 0) {
         console.log("No files to watch. Add some with --add");
         return false;
     }
+    */
     
     var watchCount = 0;
     
@@ -212,7 +214,8 @@ function watch() {
         
     }
     
-    return watchCount > 0;
+    //return watchCount > 0;
+    return true;
 }
 
 
