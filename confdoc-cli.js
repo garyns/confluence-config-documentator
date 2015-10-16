@@ -28,7 +28,7 @@ if (os.homedir) {
             userConfigJSON = JSON.parse(fs.readFileSync(os.homedir() + '/.confdoc', 'utf8'));
             
         } catch (e) {
-            console.log(("Failed to parse JSON in " + os.homedir() + "/" + configFile).red.bold);
+            console.log(("Failed to parse JSON in " + os.homedir() + "/.confdoc").red.bold);
             showUsage();
             process.exit(1);       
         }         
