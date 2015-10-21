@@ -212,11 +212,11 @@ Well, it comes with Confluence. When you upload and update your config files in 
 
 ## FAQs
 
-**Will confdoc modify my confiration files?**
+**Will confdoc modify my files?**
 
 No. confdoc never modifies the input file.
 
-**How do I use confdoc to add tags (eg ##Title) to my configuration files?**
+**How do I use confdoc to add tags (eg ##Title) to my input files?**
 
 You need to edit your files manually and add the tags yourself. confdoc never modifies your files.
 

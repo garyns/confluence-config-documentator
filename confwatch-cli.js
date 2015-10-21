@@ -231,6 +231,7 @@ function watch() {
 
 
 function upload(file, callback) {
+    
     confdoc.upload(file, function(err, msg, code) {
          
         if (code === "NO_CHANGE") {
@@ -250,7 +251,7 @@ function upload(file, callback) {
           }
         }
         
-        callback(err, msg);
+        if (callback) callback(err, msg);
         
     });    
 }
