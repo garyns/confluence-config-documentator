@@ -33,6 +33,7 @@
   "files": [
     "LICENSE",
     "README.MD",
+    "CHANGELOG.MD",
     "confdoc-cli.js",
     "confwatch-cli.js",
     "lib"
