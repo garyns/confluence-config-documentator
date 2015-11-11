@@ -10,13 +10,15 @@ var async = require("async");
 var Confdoc = require("./lib/confdoc");
 var watcher  = null;
 var configFile = null;
+var queue = [];
 
 var config = {
     username: null,
     password: null,
     server: null,
     spaceKey: null,
-    verbose: false
+    verbose: false,
+    timeout: 60
 }
 
 var ops = stdio.getopt({
@@ -28,8 +30,6 @@ var ops = stdio.getopt({
     'list': {key: 'l', description: 'List watched files', mandatory:false, args:0},
     'force': {key: 'f', description: 'Force upload of all files now', mandatory:false, default:false}
 });
-
-
 
 /**
  * Log error messages to console.
@@ -82,13 +82,11 @@ var confdoc = new Confdoc(config);
 var actionPerformed = false;
 
 if (ops['add']) {
-    addFiles();
-    actionPerformed = true;
+    actionPerformed = addFiles();
 }
 
 if (ops['remove']) {
-    removeFiles();
-    actionPerformed = true;
+    actionPerformed = removeFiles();
 }
 
 if (ops['list']) {
@@ -106,12 +104,14 @@ if (ops['force']) {
 }
 
 if (ops['watch']) {
-    var watching = watch();
     
-    if (watching) {
-        // Only watch config if we have files to watch.
+    
+    //if (watching) {
+        // Only watch config if we have files to watch. WHY??
         watchConfig();
-    }
+    //}
+    
+    var watching = watch();
     
     actionPerformed = true;
 }
@@ -132,6 +132,7 @@ function watchConfig() {
       .on('add', function(path) {
         
         console.log("Watching " + path + " (the confwatch config file)");
+        
         })
       .on('change', function(path, stats) {
         
@@ -196,8 +197,39 @@ function watch() {
         })
       .on('change', function(path, stats) {
          var now = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL style dttm.
-         console.log(path + " changed @ " + now);
-         upload(path); 
+         console.log(path + " changed @ " + now + ". " + config.timeout + " seconds until upload.");
+         
+         var to = queue[path];
+         
+         if (to !== undefined) {
+            
+            clearTimeout(to);
+            
+            //console.log("Requeued "+ path + ", " + config.timeout + " seconds until upload.");
+            
+            var to = setTimeout(function() {
+                
+                upload(path);
+                delete queue[path];
+                
+            }, config.timeout * 1000);
+            
+            queue[path] = to;            
+            
+         } else {
+            
+            //console.log("Queued "+ path + ", " + config.timeout + " seconds until upload.");
+            
+            var to = setTimeout(function() {
+                
+                upload(path);
+                delete queue[path];
+                
+            }, config.timeout * 1000);
+            
+            queue[path] = to;
+         }
+         
        })
       .on('error', function(error) {
  
@@ -280,10 +312,12 @@ function addFiles() {
               
                 config.watch.push(f);
                 console.log("Watching " + f);
+                return true;
                 
               } else {
                 
                 console.log("Already watching " + f);
+                return false;
                 
               }
 
@@ -327,14 +361,17 @@ function removeFiles() {
                                 
               if (index > -1) {
                   config.watch.splice(index, 1);
-                  console.log("No longer watching " + f);  
+                  console.log("No longer watching " + f);
+                  return true;
               } else {
                   console.log("Was not watching " + f);
+                  return false;
               }
                
             } catch (e) {
 
                console.error("File not found or not readable: " + f);
+               return false;
                
             }
            
@@ -422,5 +459,9 @@ function loadConfig() {
         // File not found.
         console.log(("Failed to load configuration in " + configFile).red.bold);
         process.exit(1);        
-    }    
+    }
+    
+    if (config.timeout === undefined) {
+        config.timeout = 60;
+    }
 }
