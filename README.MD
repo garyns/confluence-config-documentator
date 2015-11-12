@@ -146,9 +146,12 @@ The following properties are supported:
   "parentId": "12345",
   "username": "myusername",
   "password": "myPassword",
+  "timeout": 60,
   "watch": []
 }
 ```
+
+*timeout* is used by `confwatch` only. After a watched file is changed, this is the time in seconds before the file is uploaded to Confluence. Any change to the file within this time will reset the timer. This means you can perform an edit-save-test-edit-save-test cycle without incurring multiple uploads to Confluence.
 
 Remember that *parentId* is only relevant when a new Confluence Page is created.
 
