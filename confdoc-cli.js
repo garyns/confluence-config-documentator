@@ -5,6 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var colors = require('colors');
 var selfupdate = require('selfupdate');
+var moment = require('moment')();
 var packageJSON = require('./package.json');
 var os = require("os");
 var Confdoc = require("./lib/confdoc");

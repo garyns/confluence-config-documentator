@@ -66,7 +66,6 @@ console.error = function(err) {
             console.log(JSON.stringify(err).red.bold);
         }
         
-        
     }
 }
 
@@ -105,11 +104,7 @@ if (ops['force']) {
 
 if (ops['watch']) {
     
-    
-    //if (watching) {
-        // Only watch config if we have files to watch. WHY??
-        watchConfig();
-    //}
+    watchConfig();
     
     var watching = watch();
     
@@ -196,7 +191,8 @@ function watch() {
           log("Watching " + path);
         })
       .on('change', function(path, stats) {
-         var now = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL style dttm.
+         //var now = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL style dttm.
+         var now = moment.format("YYYY-MM-DD, h:mm:ssa");
          console.log(path + " changed @ " + now + ". " + config.timeout + " seconds until upload.");
          
          var to = queue[path];
