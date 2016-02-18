@@ -8,6 +8,7 @@ var colors = require('colors');
 var os = require("os");
 var async = require("async");
 var Confdoc = require("./lib/confdoc");
+var moment = require('moment')();
 var watcher  = null;
 var configFile = null;
 var queue = [];
