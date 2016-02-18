@@ -1,6 +1,6 @@
 {
   "name": "confluence-config-documentator",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Create or update pages in Confluence to document configuration files",
   "main": "lib/confdoc.js",
   "dependencies": {
