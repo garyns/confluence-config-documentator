@@ -132,7 +132,8 @@ function watchConfig() {
         })
       .on('change', function(path, stats) {
         
-         var now = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL style dttm.
+         //var now = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL style dttm.
+         var now = moment.format("YYYY-MM-DD, h:mm:ssa");
          
          console.log(path + " changed @ " + now);
          console.log("Reloading configuration.");
