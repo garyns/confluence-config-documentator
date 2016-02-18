@@ -202,9 +202,7 @@ function watch() {
          if (to !== undefined) {
             
             clearTimeout(to);
-            
-            //console.log("Requeued "+ path + ", " + config.timeout + " seconds until upload.");
-            
+
             var to = setTimeout(function() {
                 
                 upload(path);
@@ -215,9 +213,7 @@ function watch() {
             queue[path] = to;            
             
          } else {
-            
-            //console.log("Queued "+ path + ", " + config.timeout + " seconds until upload.");
-            
+
             var to = setTimeout(function() {
                 
                 upload(path);
