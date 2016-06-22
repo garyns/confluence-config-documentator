@@ -37,11 +37,11 @@ The following options are supported:
   -v, --verbose         	Verbose output and full error messages
   -n, --noupgrade       	Suspress new version check
   -c, --config <ARG1>   	Configuration File (defaults to ~/.confdoc)
-  -s, --server <ARG1>   	Confluence Server URL ("http://jira.smart-itc.com.au/conf" by default)
-  -u, --username <ARG1> 	Confluence Username ("freds" by default)
-  -p, --password <ARG1> 	Confluence Password ("fourty@40" by default)
+  -s, --server <ARG1>   	Confluence Server URL
+  -u, --username <ARG1> 	Confluence Username
+  -p, --password <ARG1> 	Confluence Password
   -f, --force           	Force page update even if no change in content
-  -k, --spaceKey <ARG1> 	Confluence Space Key ("CODE" by default)
+  -k, --spaceKey <ARG1> 	Confluence Space Key
   -o, --parentId <ARG1> 	Confluence Parent Page Id (when creating new page. Space root used if not specified)
   -i, --pageId <ARG1>   	Confluence Page Id (if not specified, title will be used to find page.)
   -t, --title <ARG1>    	Confluence Page Title (defaults to hostname:filename)
